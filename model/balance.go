@@ -8,7 +8,7 @@ import (
 
 // Balance use to track money transaction of a user
 type Balance struct {
-	ID       uuid.UUID `json:"id" gorm:"primary_key"`
+	ID       uuid.UUID `json:"id" gorm:"type:uuid;primary_key;"`
 	UserID   uuid.UUID `json:"user_id"`
 	Mutation int32     `json:"mutation"`
 }

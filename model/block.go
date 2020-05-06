@@ -16,7 +16,7 @@ type BlockData interface {
 
 // Block is use to repesent block in blockchain
 type Block struct {
-	ID        uuid.UUID            `json:"id" gorm:"primary_key"`
+	ID        uuid.UUID            `json:"id" gorm:"type:uuid;primary_key;"`
 	Timestamp time.Time            `json:"created_at"`
 	Nonce     int32                `json:"nonce"`
 	BlockType proto.BlockBlockType `json:"block_type"`

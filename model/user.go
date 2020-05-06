@@ -8,7 +8,7 @@ import (
 
 // User use to save user detail
 type User struct {
-	ID   uuid.UUID `json:"id" gorm:"primary_key"`
+	ID   uuid.UUID `json:"id" gorm:"type:uuid;primary_key;"`
 	Name string    `json:"name"`
 	NIK  string    `json:"nik"`
 }
