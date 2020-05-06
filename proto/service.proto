@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package proto;
+
+message User {
+    string id = 1;
+    string name = 2;
+    string nik = 3;
+}
+
+message Balance {
+    string id = 1;
+    string user_id = 2;
+    int32 mutation = 3;
+}
+
+message Block {
+    string id = 1;
+    string timestamp = 2;
+    int32 nonce = 3;
+    string prev_hash = 4;
+    enum block_type {
+        CREATE_USER = 0;
+        MUTATE_BALANCE = 1;
+    }
+    string data = 5;
+    string hash = 6;
+}
+
+message Blockchain {
+    repeated Block blockchain = 1;
+}
+
+message CreateUserRequest {
+    string id = 1;
+    string timestamp = 2;
+    string prev_hash = 3;
+    User data = 4;
+}
+
+message MutateBalanceRequest {
+    string id = 1;
+    string timestamp = 2;
+    string prev_hash = 3;
+    Balance mutation = 4;
+}
+
+message QueryBlockchainRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+}
+
+service BlockchainService {
+    rpc CreateUser(CreateUserRequest) returns (Block) {};
+    rpc MutateBalance(MutateBalanceRequest) returns (Block) {};
+    rpc PublishBlock(Block) returns (Block) {};
+    rpc QueryBlockchain(QueryBlockchainRequest) returns (Blockchain) {};
+}
