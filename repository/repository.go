@@ -13,7 +13,10 @@ import (
 // Repository use to interact with storage
 type Repository interface {
 	SaveBlock(block model.Block) error
-	GetAllBlock(offset, limit int32) ([]model.Block, error)
+	QueryAllBlock(offset, limit int32) ([]model.Block, error)
+	GetAllBlock() ([]model.Block, error)
+	GetLastBlock() (model.Block, error)
+	Count() (int32, error)
 
 	SaveUser(user model.User) error
 	GetUserByID(id uuid.UUID) (model.User, error)

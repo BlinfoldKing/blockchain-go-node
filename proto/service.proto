@@ -35,14 +35,12 @@ message Blockchain {
 message CreateUserRequest {
     string id = 1;
     string timestamp = 2;
-    string prev_hash = 3;
     User data = 4;
 }
 
 message MutateBalanceRequest {
     string id = 1;
     string timestamp = 2;
-    string prev_hash = 3;
     Balance mutation = 4;
 }
 
@@ -59,10 +57,16 @@ message PingResponse {
     bool ok = 1;
 }
 
+message BlockCount {
+    int32 count =1;
+}
+
 service BlockchainService {
     rpc CreateUser(CreateUserRequest) returns (Block) {};
     rpc MutateBalance(MutateBalanceRequest) returns (Block) {};
     rpc PublishBlock(Block) returns (Block) {};
+    rpc Count(Empty) returns (BlockCount) {};
     rpc QueryBlockchain(QueryBlockchainRequest) returns (Blockchain) {};
+    rpc GetAllBlock(Empty) returns (Blockchain) {};
     rpc Ping(Empty) returns (PingResponse) {};
 }

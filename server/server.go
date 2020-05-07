@@ -30,6 +30,45 @@ func (s Server) Ping(ctx context.Context, empty *proto.Empty) (*proto.PingRespon
 	}, nil
 }
 
+// Count use to count total block
+func (s Server) Count(ctx context.Context, empty *proto.Empty) (*proto.BlockCount, error) {
+	count, err := s.repo.Count()
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
+	return &proto.BlockCount{
+		Count: count,
+	}, nil
+}
+
+// Count use to count total block
+func (s Server) GetAllBlock(ctx context.Context, empty *proto.Empty) (*proto.Blockchain, error) {
+	blocks, err := s.repo.GetAllBlock()
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
+	blockchain := make([]*proto.Block, 0)
+	for _, block := range blocks {
+		blockchain = append(blockchain, &proto.Block{
+			Id:        block.ID.String(),
+			Timestamp: block.Timestamp.Format(time.RFC3339),
+			Nonce:     block.Nonce,
+			BlockType: block.BlockType,
+			PrevHash:  block.PrevHash,
+			Data:      block.Data,
+			Hash:      block.Hash,
+		})
+	}
+
+	return &proto.Blockchain{
+		Blockchain: blockchain,
+	}, nil
+}
+
 // CreateUser use to create a new user block
 func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*proto.Block, error) {
 	userid, err := uuid.FromString(req.Data.GetId())
@@ -49,11 +88,17 @@ func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*
 		return nil, err
 	}
 
+	prevBlock, err := s.repo.GetLastBlock()
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
 	newBlock, err := model.GenerateNewBlock(
 		id,
 		req.GetTimestamp(),
 		proto.Block_CREATE_USER,
-		req.GetPrevHash(),
+		prevBlock.Hash,
 		user,
 	)
 
@@ -98,11 +143,17 @@ func (s Server) MutateBalance(ctx context.Context, req *proto.MutateBalanceReque
 		return nil, err
 	}
 
+	prevBlock, err := s.repo.GetLastBlock()
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
 	newBlock, err := model.GenerateNewBlock(
 		id,
 		req.GetTimestamp(),
 		proto.Block_CREATE_USER,
-		req.GetPrevHash(),
+		prevBlock.Hash,
 		balance,
 	)
 	if err != nil {
@@ -183,7 +234,7 @@ func (s Server) QueryBlockchain(ctx context.Context, req *proto.QueryBlockchainR
 	offset := req.GetOffset()
 	limit := req.GetLimit()
 
-	blocks, err := s.repo.GetAllBlock(offset, limit)
+	blocks, err := s.repo.QueryAllBlock(offset, limit)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
