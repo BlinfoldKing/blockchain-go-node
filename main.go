@@ -22,5 +22,13 @@ func main() {
 	server := grpc.NewServer()
 	proto.RegisterBlockchainServiceServer(server, blockchainServer)
 
-	fmt.Println(server.Serve(listen))
+	var serveErr chan error
+	go func() {
+		err := server.Serve(listen)
+
+		serveErr <- err
+	}()
+
+	fmt.Println("hello")
+	fmt.Println(serveErr)
 }
