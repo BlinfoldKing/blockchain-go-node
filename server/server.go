@@ -8,27 +8,40 @@ import (
 	"github.com/blinfoldking/blockchain-go-node/proto"
 	"github.com/blinfoldking/blockchain-go-node/repository"
 	"github.com/satori/uuid"
+	"github.com/sirupsen/logrus"
 )
 
+// Server is implementation of GRPC service
 type Server struct {
 	repo repository.Repository
 }
 
+// Init use to init
 func Init() proto.BlockchainServiceServer {
 	return &Server{
 		repository.Init(),
 	}
 }
 
+// CreateUser use to create a new user block
 func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*proto.Block, error) {
-	userid, _ := uuid.FromString(req.Data.GetId())
+	userid, err := uuid.FromString(req.Data.GetId())
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 	user := model.User{
 		ID:   userid,
 		Name: req.Data.GetName(),
 		NIK:  req.Data.GetNik(),
 	}
 
-	id, _ := uuid.FromString(req.GetId())
+	id, err := uuid.FromString(req.GetId())
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
 	newBlock, err := model.GenerateNewBlock(
 		id,
 		req.GetTimestamp(),
@@ -38,6 +51,7 @@ func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*
 	)
 
 	if err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
 
@@ -51,16 +65,32 @@ func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*
 	}, nil
 }
 
+// MutateBalance create a new balance block
 func (s Server) MutateBalance(ctx context.Context, req *proto.MutateBalanceRequest) (*proto.Block, error) {
-	bid, _ := uuid.FromString(req.Mutation.GetId())
-	userid, _ := uuid.FromString(req.Mutation.GetUserId())
+	bid, err := uuid.FromString(req.Mutation.GetId())
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
+	userid, err := uuid.FromString(req.Mutation.GetUserId())
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
 	balance := model.Balance{
 		ID:       bid,
 		UserID:   userid,
 		Mutation: req.Mutation.GetMutation(),
 	}
 
-	id, _ := uuid.FromString(req.GetId())
+	id, err := uuid.FromString(req.GetId())
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
 	newBlock, err := model.GenerateNewBlock(
 		id,
 		req.GetTimestamp(),
@@ -68,8 +98,8 @@ func (s Server) MutateBalance(ctx context.Context, req *proto.MutateBalanceReque
 		req.GetPrevHash(),
 		balance,
 	)
-
 	if err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
 
@@ -84,9 +114,20 @@ func (s Server) MutateBalance(ctx context.Context, req *proto.MutateBalanceReque
 	}, nil
 }
 
+// PublishBlock use to publish block to this node storage
 func (s Server) PublishBlock(ctx context.Context, block *proto.Block) (*proto.Block, error) {
-	id, _ := uuid.FromString(block.GetId())
-	timestamp, _ := time.Parse(time.RFC3339, block.GetTimestamp())
+	id, err := uuid.FromString(block.GetId())
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
+	timestamp, err := time.Parse(time.RFC3339, block.GetTimestamp())
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
 	newBlock := model.Block{
 		ID:        id,
 		Timestamp: timestamp,
@@ -97,20 +138,23 @@ func (s Server) PublishBlock(ctx context.Context, block *proto.Block) (*proto.Bl
 		Hash:      block.GetHash(),
 	}
 
-	err := s.repo.SaveBlock(newBlock)
+	err = s.repo.SaveBlock(newBlock)
 	if err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
 
 	return block, nil
 }
 
+// QueryBlockchain use to query all blocks
 func (s Server) QueryBlockchain(ctx context.Context, req *proto.QueryBlockchainRequest) (*proto.Blockchain, error) {
 	offset := req.GetOffset()
 	limit := req.GetLimit()
 
 	blocks, err := s.repo.GetAllBlock(offset, limit)
 	if err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
 

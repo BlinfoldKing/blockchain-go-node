@@ -7,6 +7,7 @@ import (
 	"github.com/blinfoldking/blockchain-go-node/proto"
 	"github.com/blinfoldking/blockchain-go-node/server"
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
 
@@ -24,11 +25,14 @@ func main() {
 
 	var serveErr chan error
 	go func() {
-		err := server.Serve(listen)
+		logrus.Info("serve on port 9000")
+		err = server.Serve(listen)
 
 		serveErr <- err
 	}()
 
 	fmt.Println("hello")
+	<-serveErr
+
 	fmt.Println(serveErr)
 }

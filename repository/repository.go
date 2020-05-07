@@ -6,9 +6,11 @@ import (
 
 	"github.com/blinfoldking/blockchain-go-node/model"
 	"github.com/jinzhu/gorm"
+	_ "github.com/lib/pq"
 	"github.com/satori/uuid"
 )
 
+// Repository use to interact with storage
 type Repository interface {
 	SaveBlock(block model.Block) error
 	GetAllBlock(offset, limit int32) ([]model.Block, error)
@@ -24,6 +26,7 @@ type databaseRepository struct {
 	*gorm.DB
 }
 
+// Init use to connect to db
 func Init() Repository {
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
