@@ -51,9 +51,18 @@ message QueryBlockchainRequest {
     int32 limit = 2;
 }
 
+message Empty {
+
+}
+
+message PingResponse {
+    bool ok = 1;
+}
+
 service BlockchainService {
     rpc CreateUser(CreateUserRequest) returns (Block) {};
     rpc MutateBalance(MutateBalanceRequest) returns (Block) {};
     rpc PublishBlock(Block) returns (Block) {};
     rpc QueryBlockchain(QueryBlockchainRequest) returns (Blockchain) {};
+    rpc Ping(Empty) returns (PingResponse) {};
 }

@@ -23,6 +23,13 @@ func Init() proto.BlockchainServiceServer {
 	}
 }
 
+// Ping use to test connection
+func (s Server) Ping(ctx context.Context, empty *proto.Empty) (*proto.PingResponse, error) {
+	return &proto.PingResponse{
+		Ok: true,
+	}, nil
+}
+
 // CreateUser use to create a new user block
 func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*proto.Block, error) {
 	userid, err := uuid.FromString(req.Data.GetId())
