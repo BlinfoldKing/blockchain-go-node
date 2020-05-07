@@ -13,6 +13,13 @@ type Balance struct {
 	Mutation int32     `json:"mutation"`
 }
 
+// BalanceFromJSON use to create user from json string
+func BalanceFromJSON(str string) (balance Balance, err error) {
+	err = json.Unmarshal([]byte(str), &balance)
+
+	return
+}
+
 func (b Balance) toJSON() (string, error) {
 	data, err := json.Marshal(&b)
 	if err != nil {

@@ -13,6 +13,13 @@ type User struct {
 	NIK  string    `json:"nik"`
 }
 
+// UserFromJSON use to create user from json string
+func UserFromJSON(str string) (user User, err error) {
+	err = json.Unmarshal([]byte(str), &user)
+
+	return
+}
+
 func (u User) toJSON() (string, error) {
 	data, err := json.Marshal(&u)
 	if err != nil {

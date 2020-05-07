@@ -138,6 +138,30 @@ func (s Server) PublishBlock(ctx context.Context, block *proto.Block) (*proto.Bl
 		Hash:      block.GetHash(),
 	}
 
+	if newBlock.BlockType == proto.Block_CREATE_USER {
+		user, err := model.UserFromJSON(newBlock.Data)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+		err = s.repo.SaveUser(user)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+	} else if newBlock.BlockType == proto.Block_MUTATE_BALANCE {
+		balance, err := model.BalanceFromJSON(newBlock.Data)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+		err = s.repo.SaveBalance(balance)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+	}
+
 	err = s.repo.SaveBlock(newBlock)
 	if err != nil {
 		logrus.Error(err)
