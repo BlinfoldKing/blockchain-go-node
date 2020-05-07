@@ -19,12 +19,13 @@ message Block {
     string timestamp = 2;
     int32 nonce = 3;
     string prev_hash = 4;
-    enum block_type {
+    enum BlockType {
         CREATE_USER = 0;
         MUTATE_BALANCE = 1;
     }
-    string data = 5;
-    string hash = 6;
+    BlockType block_type = 5;
+    string data = 6;
+    string hash = 7;
 }
 
 message Blockchain {

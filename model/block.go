@@ -16,13 +16,13 @@ type BlockData interface {
 
 // Block is use to repesent block in blockchain
 type Block struct {
-	ID        uuid.UUID            `json:"id" gorm:"type:uuid;primary_key;"`
-	Timestamp time.Time            `json:"created_at"`
-	Nonce     int32                `json:"nonce"`
-	BlockType proto.BlockBlockType `json:"block_type"`
-	PrevHash  string               `json:"prev_hash"`
-	Data      string               `json:"data"`
-	Hash      string               `json:"hash"`
+	ID        uuid.UUID             `json:"id" gorm:"type:uuid;primary_key;"`
+	Timestamp time.Time             `json:"created_at"`
+	Nonce     int32                 `json:"nonce"`
+	BlockType proto.Block_BlockType `json:"block_type"`
+	PrevHash  string                `json:"prev_hash"`
+	Data      string                `json:"data"`
+	Hash      string                `json:"hash"`
 }
 
 // GenerateHash is used to generate based on block content
@@ -42,7 +42,7 @@ func (block *Block) GenerateHash() string {
 func GenerateNewBlock(
 	id uuid.UUID,
 	timestamp string,
-	blockType proto.BlockBlockType,
+	blockType proto.Block_BlockType,
 	prevHash string,
 	data BlockData,
 ) (*Block, error) {
