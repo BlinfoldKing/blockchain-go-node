@@ -1,6 +1,9 @@
 package repository
 
-import "github.com/blinfoldking/blockchain-go-node/model"
+import (
+	"github.com/blinfoldking/blockchain-go-node/model"
+	"github.com/jinzhu/gorm"
+)
 
 func (repo *databaseRepository) SaveBlock(block model.Block) (err error) {
 	err = repo.DB.Save(&block).Error
@@ -22,6 +25,9 @@ func (repo *databaseRepository) QueryAllBlock(offset, limit int32) (blocks []mod
 
 func (repo *databaseRepository) GetLastBlock() (blocks model.Block, err error) {
 	err = repo.DB.Last(&blocks).Error
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return model.Block{}, nil
+	}
 
 	return
 }
