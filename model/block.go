@@ -2,7 +2,8 @@ package model
 
 import (
 	"crypto/sha256"
-	"fmt"
+	"encoding/hex"
+	"encoding/json"
 	"time"
 
 	"github.com/blinfoldking/blockchain-go-node/proto"
@@ -27,15 +28,21 @@ type Block struct {
 
 // GenerateHash is used to generate based on block content
 func (block *Block) GenerateHash() string {
-	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%d:%d:%s:%s",
-		block.ID.String(),
-		block.Timestamp.Format(time.RFC3339),
-		block.Nonce,
-		block.BlockType,
-		block.PrevHash,
-		block.Data,
-	)))
-	return string(hash[:])
+	data := make(map[string]interface{})
+	data["id"] = block.ID
+	data["timestamp"] = block.Timestamp
+	data["nonce"] = block.Nonce
+	data["block_type"] = block.BlockType
+	data["prev_hash"] = block.PrevHash
+	data["data"] = block.Data
+
+	raw, _ := json.Marshal(data)
+
+	h := sha256.New()
+	h.Write(raw)
+	hash := hex.EncodeToString(h.Sum(raw))
+
+	return hash
 }
 
 // GenerateNewBlock use to generate new block with nonce and
@@ -68,7 +75,7 @@ func GenerateNewBlock(
 	}
 
 	var hash string
-	for hash = newBlock.GenerateHash(); len(hash) >= 3 && hash[:3] == "000"; hash = newBlock.GenerateHash() {
+	for hash = newBlock.GenerateHash(); len(hash) >= 3 && hash[len(hash)-3:] != "ace"; hash = newBlock.GenerateHash() {
 		nonce++
 		newBlock = Block{
 			id,

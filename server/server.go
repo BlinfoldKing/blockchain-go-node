@@ -43,7 +43,7 @@ func (s Server) Count(ctx context.Context, empty *proto.Empty) (*proto.BlockCoun
 	}, nil
 }
 
-// Count use to count total block
+// GetAllBlock use to count total block
 func (s Server) GetAllBlock(ctx context.Context, empty *proto.Empty) (*proto.Blockchain, error) {
 	blocks, err := s.repo.GetAllBlock()
 	if err != nil {
@@ -71,6 +71,7 @@ func (s Server) GetAllBlock(ctx context.Context, empty *proto.Empty) (*proto.Blo
 
 // CreateUser use to create a new user block
 func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*proto.Block, error) {
+	logrus.Info("creating block " + req.Data.GetId())
 	userid, err := uuid.FromString(req.Data.GetId())
 	if err != nil {
 		logrus.Error(err)
@@ -107,6 +108,7 @@ func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*
 		return nil, err
 	}
 
+	logrus.Info("block created" + userid.String())
 	return &proto.Block{
 		Id:        newBlock.ID.String(),
 		Timestamp: newBlock.Timestamp.Format(time.RFC3339),
