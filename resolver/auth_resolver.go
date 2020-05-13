@@ -5,10 +5,10 @@ type LoginResponse struct {
 	token string
 }
 
-func (l *LoginResponse) OK() bool {
+func (l LoginResponse) OK() bool {
 	return l.ok
 }
 
-func (l *LoginResponse) TOKEN() string {
+func (l LoginResponse) TOKEN() string {
 	return l.token
 }

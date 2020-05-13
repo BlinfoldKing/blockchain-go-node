@@ -11,7 +11,7 @@ input RegisterRequest {
 }
 
 type LoginResponse {
-    ok: Bool!
+    ok: Boolean!
     token: String!
 }
 
@@ -24,7 +24,7 @@ type User {
 
 type Transaction {
     id: String!
-    amount: int32!
+    amount: Int!
 }
 
 type Balance {
@@ -36,6 +36,7 @@ type Balance {
 type Query {
     # Login(request: LoginRequest!): LoginResponse!
     # GetAccountDetail(): User!
+    Connect(url: String!): Boolean!
 }
 
 type Mutation {

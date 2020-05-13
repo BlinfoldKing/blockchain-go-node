@@ -3,10 +3,12 @@ package resolver
 import (
 	"context"
 	"errors"
+	"os"
 	"time"
 
 	"github.com/blinfoldking/blockchain-go-node/model"
 	"github.com/blinfoldking/blockchain-go-node/proto"
+	"github.com/blinfoldking/blockchain-go-node/rpc"
 	"github.com/blinfoldking/blockchain-go-node/service"
 	"github.com/satori/uuid"
 	"github.com/sirupsen/logrus"
@@ -18,8 +20,22 @@ func New() *Resolver {
 	return &Resolver{}
 }
 
+func (r *Resolver) Connect(ctx context.Context, args struct {
+	Url string
+}) (bool, error) {
+	conn, err := rpc.ConnectNode(args.Url)
+	if err != nil {
+		return false, err
+	}
+	service.ServiceConnection.PoolConnection = conn
+	conn.Connect(ctx, &proto.ConnectRequest{
+		Address: os.Getenv("SELF_URL"),
+	})
+	return true, nil
+}
+
 func (r *Resolver) Register(ctx context.Context, args struct {
-	req struct {
+	Request struct {
 		Name     string
 		Nik      string
 		Username string
@@ -28,11 +44,11 @@ func (r *Resolver) Register(ctx context.Context, args struct {
 }) (res LoginResponse, err error) {
 	user, err := model.NewUser(
 		uuid.NewV4(),
-		args.req.Name,
-		args.req.Nik,
+		args.Request.Name,
+		args.Request.Nik,
 		proto.User_CLIENT,
-		args.req.Username,
-		args.req.Password,
+		args.Request.Username,
+		args.Request.Password,
 	)
 	if err != nil {
 		logrus.Error(err)
@@ -47,9 +63,10 @@ func (r *Resolver) Register(ctx context.Context, args struct {
 	_, err = service.ServiceConnection.
 		PoolConnection.
 		CreateUser(ctx, &proto.CreateUserRequest{
-			Id:        user.ID.String(),
+			Id:        uuid.NewV4().String(),
 			Timestamp: time.Now().Format(time.RFC3339),
 			Data: &proto.User{
+				Id:           user.ID.String(),
 				Name:         user.Name,
 				Nik:          user.NIK,
 				Role:         user.Role,

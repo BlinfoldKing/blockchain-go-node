@@ -46,7 +46,7 @@ func (repo *databaseRepository) GetLastBlock() (blocks model.Block, err error) {
 }
 
 func (repo *databaseRepository) Count() (count int32, err error) {
-	err = repo.DB.Count(&count).Error
+	err = repo.DB.Model(&model.Block{}).Count(&count).Error
 
 	return
 }
