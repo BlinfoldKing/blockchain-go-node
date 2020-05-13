@@ -16,6 +16,7 @@ type Repository interface {
 	QueryAllBlock(offset, limit int32) ([]model.Block, error)
 	GetAllBlock() ([]model.Block, error)
 	GetLastBlock() (model.Block, error)
+	GetBlockByID(id uuid.UUID) (model.Block, error)
 	Count() (int32, error)
 
 	SaveUser(user model.User) error

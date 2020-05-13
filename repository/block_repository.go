@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/blinfoldking/blockchain-go-node/model"
 	"github.com/jinzhu/gorm"
+	"github.com/satori/uuid"
 )
 
 func (repo *databaseRepository) SaveBlock(block model.Block) (err error) {
@@ -13,6 +14,12 @@ func (repo *databaseRepository) SaveBlock(block model.Block) (err error) {
 
 func (repo *databaseRepository) GetAllBlock() (blocks []model.Block, err error) {
 	err = repo.DB.Find(&blocks).Error
+
+	return
+}
+
+func (repo *databaseRepository) GetBlockByID(id uuid.UUID) (block model.Block, err error) {
+	err = repo.DB.Where("id = ?", id).Find(&block).Error
 
 	return
 }

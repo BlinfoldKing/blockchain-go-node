@@ -287,3 +287,27 @@ func (s Server) QueryBlockchain(ctx context.Context, req *proto.QueryBlockchainR
 		Blockchain: blockchain,
 	}, nil
 }
+
+func (s Server) GetBlockById(ctx context.Context, req *proto.GetBlockByIdRequest) (*proto.Block, error) {
+	id, err := uuid.FromString(req.GetId())
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
+	block, err := service.ServiceConnection.Repo.GetBlockByID(id)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
+	return &proto.Block{
+		Id:        block.ID.String(),
+		Timestamp: block.Timestamp.Format(time.RFC3339),
+		Nonce:     block.Nonce,
+		BlockType: block.BlockType,
+		PrevHash:  block.PrevHash,
+		Data:      block.Data,
+		Hash:      block.Hash,
+	}, nil
+}
