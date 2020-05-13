@@ -6,12 +6,16 @@ import (
 
 	"github.com/blinfoldking/blockchain-go-node/proto"
 	"github.com/blinfoldking/blockchain-go-node/server"
+	"github.com/blinfoldking/blockchain-go-node/service"
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	service.ServiceConnection = service.New()
 	godotenv.Load()
 
 	var grpcErr chan error
@@ -31,6 +35,17 @@ func main() {
 
 		grpcErr <- err
 	}()
+
+	handler := server.InitHandler()
+	e := echo.New()
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+	}))
+
+	e.POST("/graphql", handler.Query)
+	e.GET("/graphql", handler.Playground)
+	e.Logger.Fatal(e.Start(":3000"))
 
 	logrus.Fatal(<-grpcErr)
 }

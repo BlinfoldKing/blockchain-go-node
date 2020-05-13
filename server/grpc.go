@@ -6,6 +6,7 @@ import (
 
 	"github.com/blinfoldking/blockchain-go-node/model"
 	"github.com/blinfoldking/blockchain-go-node/proto"
+	"github.com/blinfoldking/blockchain-go-node/rpc"
 	"github.com/blinfoldking/blockchain-go-node/service"
 	"github.com/satori/uuid"
 	"github.com/sirupsen/logrus"
@@ -18,6 +19,19 @@ type Server struct {
 // Init use to init
 func InitGRPC() proto.BlockchainServiceServer {
 	return &Server{}
+}
+
+// Ping use to test connection
+func (s Server) Connect(ctx context.Context, req *proto.ConnectRequest) (*proto.ConnectResponse, error) {
+	conn, err := rpc.ConnectNode(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	service.ServiceConnection.PoolConnection = conn
+	return &proto.ConnectResponse{
+		Ok: true,
+	}, nil
 }
 
 // Ping use to test connection
@@ -82,9 +96,12 @@ func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*
 		return nil, err
 	}
 	user := model.User{
-		ID:   userid,
-		Name: req.Data.GetName(),
-		NIK:  req.Data.GetNik(),
+		ID:           userid,
+		Name:         req.Data.GetName(),
+		NIK:          req.Data.GetNik(),
+		Role:         req.Data.GetRole(),
+		Username:     req.Data.GetUsername(),
+		PasswordHash: req.Data.GetPasswordHash(),
 	}
 
 	id, err := uuid.FromString(req.GetId())

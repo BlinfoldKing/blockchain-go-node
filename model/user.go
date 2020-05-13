@@ -5,6 +5,7 @@ import (
 
 	"github.com/blinfoldking/blockchain-go-node/proto"
 	"github.com/satori/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // User use to save user detail
@@ -30,4 +31,31 @@ func (u User) toJSON() (string, error) {
 		return "", err
 	}
 	return string(data), nil
+}
+
+func (u User) CheckPasswordHash(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password))
+	return err == nil
+}
+
+func NewUser(
+	id uuid.UUID,
+	name string,
+	nik string,
+	role proto.User_Role,
+	username string,
+	password string,
+) (User, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		return User{}, err
+	}
+	return User{
+		id,
+		name,
+		nik,
+		role,
+		username,
+		string(bytes),
+	}, nil
 }

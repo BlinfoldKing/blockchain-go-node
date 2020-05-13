@@ -1,15 +1,20 @@
 package service
 
-import "github.com/blinfoldking/blockchain-go-node/repository"
+import (
+	"github.com/blinfoldking/blockchain-go-node/proto"
+	"github.com/blinfoldking/blockchain-go-node/repository"
+)
 
 var ServiceConnection Service
 
 type Service struct {
-	Repo repository.Repository
+	Repo           repository.Repository
+	PoolConnection proto.BlockchainServiceClient
 }
 
 func New() Service {
 	return Service{
-		Repo: repository.Init(),
+		Repo:           repository.Init(),
+		PoolConnection: nil,
 	}
 }

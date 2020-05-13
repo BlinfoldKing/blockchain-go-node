@@ -1,0 +1,44 @@
+input LoginRequest {
+    username: String!
+    password: String!
+}
+
+input RegisterRequest {
+    name: String!
+    nik: String!
+    username: String!
+    password: String!
+}
+
+type LoginResponse {
+    ok: Bool!
+    token: String!
+}
+
+type User {
+    id: String!
+    name: String!
+    username: String!
+    nik: String!
+}
+
+type Transaction {
+    id: String!
+    amount: int32!
+}
+
+type Balance {
+    total_amount: Int!
+    transaction_history: [Transaction!]
+}
+
+
+type Query {
+    # Login(request: LoginRequest!): LoginResponse!
+    # GetAccountDetail(): User!
+}
+
+type Mutation {
+    Register(request: RegisterRequest!): LoginResponse!
+    # MutateBalance(amount: Int!): Boolean!
+}
