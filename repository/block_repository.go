@@ -17,6 +17,12 @@ func (repo *databaseRepository) GetAllBlock() (blocks []model.Block, err error) 
 	return
 }
 
+func (repo *databaseRepository) MutateBlockByID(block model.Block) (err error) {
+	err = repo.DB.Save(&block).Error
+
+	return
+}
+
 func (repo *databaseRepository) QueryAllBlock(offset, limit int32) (blocks []model.Block, err error) {
 	err = repo.DB.Offset(offset).Limit(limit).Find(&blocks).Error
 

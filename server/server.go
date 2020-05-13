@@ -64,7 +64,14 @@ func (s Server) GetAllBlock(ctx context.Context, empty *proto.Empty) (*proto.Blo
 		})
 	}
 
+	count, err := s.repo.Count()
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
 	return &proto.Blockchain{
+		Count:      count,
 		Blockchain: blockchain,
 	}, nil
 }
@@ -120,23 +127,23 @@ func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*
 }
 
 // MutateBalance create a new balance block
-func (s Server) MutateBalance(ctx context.Context, req *proto.MutateBalanceRequest) (*proto.Block, error) {
-	bid, err := uuid.FromString(req.Mutation.GetId())
+func (s Server) MutateBalance(ctx context.Context, req *proto.RequestTransaction) (*proto.Block, error) {
+	bid, err := uuid.FromString(req.Transaction.GetId())
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
 
-	userid, err := uuid.FromString(req.Mutation.GetUserId())
+	userid, err := uuid.FromString(req.Transaction.GetUserId())
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
 	}
 
-	balance := model.Balance{
-		ID:       bid,
-		UserID:   userid,
-		Mutation: req.Mutation.GetMutation(),
+	transaction := model.Transaction{
+		ID:     bid,
+		UserID: userid,
+		Amount: req.Transaction.GetAmount(),
 	}
 
 	id, err := uuid.FromString(req.GetId())
@@ -156,7 +163,7 @@ func (s Server) MutateBalance(ctx context.Context, req *proto.MutateBalanceReque
 		req.GetTimestamp(),
 		proto.Block_CREATE_USER,
 		prevBlock.Hash,
-		balance,
+		transaction,
 	)
 	if err != nil {
 		logrus.Error(err)
@@ -210,12 +217,12 @@ func (s Server) PublishBlock(ctx context.Context, block *proto.Block) (*proto.Bl
 			return nil, err
 		}
 	} else if newBlock.BlockType == proto.Block_MUTATE_BALANCE {
-		balance, err := model.BalanceFromJSON(newBlock.Data)
+		balance, err := model.TransactionFromJSON(newBlock.Data)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
-		err = s.repo.SaveBalance(balance)
+		err = s.repo.SaveTransaction(balance)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
@@ -255,7 +262,14 @@ func (s Server) QueryBlockchain(ctx context.Context, req *proto.QueryBlockchainR
 		})
 	}
 
+	count, err := s.repo.Count()
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
+
 	return &proto.Blockchain{
+		Count:      count,
 		Blockchain: blockchain,
 	}, nil
 }

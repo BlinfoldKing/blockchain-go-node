@@ -6,12 +6,18 @@ message User {
     string id = 1;
     string name = 2;
     string nik = 3;
+    enum Role {
+        ADMIN = 0;
+        CLIENT = 1;
+    }
+    string username = 4;
+    string password_hash = 5;
 }
 
-message Balance {
+message Transaction {
     string id = 1;
     string user_id = 2;
-    int32 mutation = 3;
+    int32 amount = 3;
 }
 
 message Block {
@@ -30,6 +36,7 @@ message Block {
 
 message Blockchain {
     repeated Block blockchain = 1;
+    int32 count = 2;
 }
 
 message CreateUserRequest {
@@ -38,10 +45,10 @@ message CreateUserRequest {
     User data = 4;
 }
 
-message MutateBalanceRequest {
+message RequestTransaction {
     string id = 1;
     string timestamp = 2;
-    Balance mutation = 4;
+    Transaction transaction = 4;
 }
 
 message QueryBlockchainRequest {
@@ -61,12 +68,18 @@ message BlockCount {
     int32 count =1;
 }
 
+message ConnectResponse {
+    bool ok = 1;
+}
+
 service BlockchainService {
     rpc CreateUser(CreateUserRequest) returns (Block) {};
-    rpc MutateBalance(MutateBalanceRequest) returns (Block) {};
+    rpc MutateBalance(RequestTransaction) returns (Block) {};
+    
     rpc PublishBlock(Block) returns (Block) {};
     rpc Count(Empty) returns (BlockCount) {};
     rpc QueryBlockchain(QueryBlockchainRequest) returns (Blockchain) {};
     rpc GetAllBlock(Empty) returns (Blockchain) {};
+
     rpc Ping(Empty) returns (PingResponse) {};
 }

@@ -21,8 +21,8 @@ type Repository interface {
 	SaveUser(user model.User) error
 	GetUserByID(id uuid.UUID) (model.User, error)
 
-	SaveBalance(balance model.Balance) error
-	GetBalanceByUserID(id uuid.UUID) (model.Balance, error)
+	SaveTransaction(transaction model.Transaction) error
+	GetTransactionByUserID(id uuid.UUID) (model.Transaction, error)
 }
 
 type databaseRepository struct {
@@ -44,7 +44,7 @@ func Init() Repository {
 
 	db.AutoMigrate(&model.Block{})
 	db.AutoMigrate(&model.User{})
-	db.AutoMigrate(&model.Balance{})
+	db.AutoMigrate(&model.Transaction{})
 
 	return &databaseRepository{db}
 }
