@@ -72,6 +72,10 @@ message ConnectResponse {
     bool ok = 1;
 }
 
+message ConnectRequest {
+    string address = 1;
+}
+
 service BlockchainService {
     rpc CreateUser(CreateUserRequest) returns (Block) {};
     rpc MutateBalance(RequestTransaction) returns (Block) {};
@@ -81,5 +85,6 @@ service BlockchainService {
     rpc QueryBlockchain(QueryBlockchainRequest) returns (Blockchain) {};
     rpc GetAllBlock(Empty) returns (Blockchain) {};
 
+    rpc Connect(ConnectRequest) returns (ConnectResponse) {};
     rpc Ping(Empty) returns (PingResponse) {};
 }

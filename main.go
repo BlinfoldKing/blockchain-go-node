@@ -14,9 +14,9 @@ import (
 func main() {
 	godotenv.Load()
 
-	var serveErr chan error
+	var grpcErr chan error
 	go func() {
-		blockchainServer := server.Init()
+		blockchainServer := server.InitGRPC()
 		server := grpc.NewServer()
 		proto.RegisterBlockchainServiceServer(server, blockchainServer)
 
@@ -29,8 +29,8 @@ func main() {
 		logrus.Info("serve on port 9000")
 		err = server.Serve(listen)
 
-		serveErr <- err
+		grpcErr <- err
 	}()
 
-	logrus.Fatal(<-serveErr)
+	logrus.Fatal(<-grpcErr)
 }

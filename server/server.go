@@ -6,21 +6,18 @@ import (
 
 	"github.com/blinfoldking/blockchain-go-node/model"
 	"github.com/blinfoldking/blockchain-go-node/proto"
-	"github.com/blinfoldking/blockchain-go-node/repository"
+	"github.com/blinfoldking/blockchain-go-node/service"
 	"github.com/satori/uuid"
 	"github.com/sirupsen/logrus"
 )
 
 // Server is implementation of GRPC service
 type Server struct {
-	repo repository.Repository
 }
 
 // Init use to init
-func Init() proto.BlockchainServiceServer {
-	return &Server{
-		repository.Init(),
-	}
+func InitGRPC() proto.BlockchainServiceServer {
+	return &Server{}
 }
 
 // Ping use to test connection
@@ -32,7 +29,7 @@ func (s Server) Ping(ctx context.Context, empty *proto.Empty) (*proto.PingRespon
 
 // Count use to count total block
 func (s Server) Count(ctx context.Context, empty *proto.Empty) (*proto.BlockCount, error) {
-	count, err := s.repo.Count()
+	count, err := service.ServiceConnection.Repo.Count()
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -45,7 +42,7 @@ func (s Server) Count(ctx context.Context, empty *proto.Empty) (*proto.BlockCoun
 
 // GetAllBlock use to count total block
 func (s Server) GetAllBlock(ctx context.Context, empty *proto.Empty) (*proto.Blockchain, error) {
-	blocks, err := s.repo.GetAllBlock()
+	blocks, err := service.ServiceConnection.Repo.GetAllBlock()
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -64,7 +61,7 @@ func (s Server) GetAllBlock(ctx context.Context, empty *proto.Empty) (*proto.Blo
 		})
 	}
 
-	count, err := s.repo.Count()
+	count, err := service.ServiceConnection.Repo.Count()
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -96,7 +93,7 @@ func (s Server) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*
 		return nil, err
 	}
 
-	prevBlock, err := s.repo.GetLastBlock()
+	prevBlock, err := service.ServiceConnection.Repo.GetLastBlock()
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -152,7 +149,7 @@ func (s Server) MutateBalance(ctx context.Context, req *proto.RequestTransaction
 		return nil, err
 	}
 
-	prevBlock, err := s.repo.GetLastBlock()
+	prevBlock, err := service.ServiceConnection.Repo.GetLastBlock()
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -211,7 +208,7 @@ func (s Server) PublishBlock(ctx context.Context, block *proto.Block) (*proto.Bl
 			logrus.Error(err)
 			return nil, err
 		}
-		err = s.repo.SaveUser(user)
+		err = service.ServiceConnection.Repo.SaveUser(user)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
@@ -222,14 +219,14 @@ func (s Server) PublishBlock(ctx context.Context, block *proto.Block) (*proto.Bl
 			logrus.Error(err)
 			return nil, err
 		}
-		err = s.repo.SaveTransaction(balance)
+		err = service.ServiceConnection.Repo.SaveTransaction(balance)
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
 		}
 	}
 
-	err = s.repo.SaveBlock(newBlock)
+	err = service.ServiceConnection.Repo.SaveBlock(newBlock)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -243,7 +240,7 @@ func (s Server) QueryBlockchain(ctx context.Context, req *proto.QueryBlockchainR
 	offset := req.GetOffset()
 	limit := req.GetLimit()
 
-	blocks, err := s.repo.QueryAllBlock(offset, limit)
+	blocks, err := service.ServiceConnection.Repo.QueryAllBlock(offset, limit)
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
@@ -262,7 +259,7 @@ func (s Server) QueryBlockchain(ctx context.Context, req *proto.QueryBlockchainR
 		})
 	}
 
-	count, err := s.repo.Count()
+	count, err := service.ServiceConnection.Repo.Count()
 	if err != nil {
 		logrus.Error(err)
 		return nil, err
