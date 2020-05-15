@@ -24,10 +24,13 @@ func InitGRPC() proto.BlockchainServiceServer {
 func (s Server) DropEverything(ctx context.Context, empty *proto.Empty) (*proto.DropResponse, error) {
 	err := service.ServiceConnection.Repo.DangerouslyDroppingEverything()
 	if err != nil {
+		logrus.Error(err)
 		return nil, err
 	}
 
-	return nil, err
+	return &proto.DropResponse{
+		Ok: true,
+	}, err
 }
 
 // Ping use to test connection
