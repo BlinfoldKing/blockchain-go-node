@@ -15,6 +15,7 @@ import (
 )
 
 func main() {
+	logrus.SetReportCaller(true)
 	service.ServiceConnection = service.New()
 	godotenv.Load()
 

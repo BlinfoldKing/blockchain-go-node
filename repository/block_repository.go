@@ -14,7 +14,6 @@ func (repo *databaseRepository) SaveBlock(block model.Block) (err error) {
 
 func (repo *databaseRepository) GetAllBlock() (blocks []model.Block, err error) {
 	err = repo.DB.Find(&blocks).Error
-
 	return
 }
 

@@ -16,3 +16,9 @@ func (repo databaseRepository) GetUserByID(id uuid.UUID) (user model.User, err e
 
 	return
 }
+
+func (repo databaseRepository) GetUserByUsername(username string) (user model.User, err error) {
+	err = repo.DB.Where("username = ?", username).Find(&user).Error
+
+	return
+}

@@ -62,7 +62,8 @@ func (s Server) GetAllBlock(ctx context.Context, empty *proto.Empty) (*proto.Blo
 		return nil, err
 	}
 
-	blockchain := make([]*proto.Block, 0)
+	logrus.Info(blocks)
+	blockchain := []*proto.Block{}
 	for _, block := range blocks {
 		blockchain = append(blockchain, &proto.Block{
 			Id:        block.ID.String(),
@@ -175,7 +176,7 @@ func (s Server) MutateBalance(ctx context.Context, req *proto.RequestTransaction
 	newBlock, err := model.GenerateNewBlock(
 		id,
 		req.GetTimestamp(),
-		proto.Block_CREATE_USER,
+		proto.Block_MUTATE_BALANCE,
 		prevBlock.Hash,
 		transaction,
 	)

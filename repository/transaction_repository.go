@@ -11,7 +11,7 @@ func (repo *databaseRepository) SaveTransaction(transaction model.Transaction) (
 	return
 }
 
-func (repo *databaseRepository) GetTransactionByUserID(id uuid.UUID) (transaction model.Transaction, err error) {
+func (repo *databaseRepository) GetTransactionByUserID(id uuid.UUID) (transaction []model.Transaction, err error) {
 	err = repo.DB.Where("user_id = ?", id).Find(&transaction).Error
 
 	return

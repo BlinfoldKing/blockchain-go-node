@@ -1,11 +1,13 @@
 package graphql
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"os"
 
+	"github.com/blinfoldking/blockchain-go-node/model"
 	"github.com/blinfoldking/blockchain-go-node/resolver"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/labstack/echo"
@@ -47,44 +49,22 @@ func GqlResponse(ctx echo.Context, Schema *graphql.Schema) error {
 		Variables     map[string]interface{} `json:"variables"`
 	}
 
-	// var graphqlContext context.Context
-	// authorization := ctx.Request().Header.Get("Authorization")
-	// if authorization != "" {
-	// 	logrus.Println(authorization)
-	// 	token, err := jwt.Parse(authorization, func(token *jwt.Token) (interface{}, error) {
-	// 		if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-	// 			return nil, fmt.Errorf("Signing method invalid")
-	// 		} else if method != jwt.SigningMethodHS256 {
-	// 			return nil, fmt.Errorf("Signing method invalid")
-	// 		}
+	var graphqlContext context.Context
+	authorization := ctx.Request().Header.Get("Authorization")
+	if authorization != "" {
+		user, err := model.ValidateToken(authorization)
+		if err == nil {
+			graphqlContext = context.WithValue(context.Background(), "user", user)
+		} else {
+			graphqlContext = r.Context()
+		}
+	} else {
+		graphqlContext = r.Context()
+	}
 
-	// 		return []byte("secret"), nil
-	// 	})
-
-	// 	if err != nil {
-	// 		logrus.Println(">>>>>>>>>>>>>>>>>>>")
-	// 		return err
-	// 	}
-
-	// 	claims, ok := token.Claims.(jwt.MapClaims)
-	// 	if !ok {
-	// 		logrus.Error("not ok when when converting token")
-	// 		return errors.New("not ok when when converting token")
-	// 	}
-
-	// 	logrus.Println(">>>>>>>>>>>>>>>>>>>", claims)
-	// 	logrus.Println(">>>>>", claims["user"].(string))
-	// 	if claims["user"] != nil {
-	// 		graphqlContext = context.WithValue(context.Background(), "user", claims["user"].(string))
-	// 	}
-	// } else {
-	// 	graphqlContext = r.Context()
-	// }
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		return err
 	}
-
-	graphqlContext := r.Context()
 
 	response := Schema.Exec(graphqlContext, params.Query, params.OperationName, params.Variables)
 	responseJSON, err := json.Marshal(response)

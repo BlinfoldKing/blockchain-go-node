@@ -75,8 +75,85 @@ func (r *Resolver) Register(ctx context.Context, args struct {
 			},
 		})
 
+	token, err := user.GenerateToken()
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
 	return LoginResponse{
 		ok:    true,
-		token: "",
+		token: token,
+	}, nil
+}
+
+func (r Resolver) Login(ctx context.Context, args struct {
+	Request struct {
+		Username string
+		Password string
+	}
+}) (LoginResponse, error) {
+	user, err := service.ServiceConnection.Repo.GetUserByUsername(args.Request.Username)
+	if err != nil {
+		return LoginResponse{ok: false}, err
+	}
+
+	ok := user.CheckPasswordHash(args.Request.Password)
+	if !ok {
+		return LoginResponse{ok: false}, errors.New("wrong password")
+	}
+
+	token, err := user.GenerateToken()
+	if err != nil {
+		return LoginResponse{ok: true}, err
+	}
+
+	return LoginResponse{
+		ok:    true,
+		token: token,
+	}, nil
+}
+
+func (r Resolver) GetAccountDetail(ctx context.Context) (UserResolver, error) {
+	userI := ctx.Value("user")
+	if userI == nil {
+		return UserResolver{}, errors.New("no valid token found")
+	}
+
+	user := userI.(model.User)
+
+	return UserResolver{user}, nil
+}
+
+func (r Resolver) MutateBalance(ctx context.Context, args struct {
+	Amount int32
+}) (TransactionResolver, error) {
+	userI := ctx.Value("user")
+	if userI == nil {
+		return TransactionResolver{}, errors.New("no valid token found")
+	}
+
+	user := userI.(model.User)
+
+	req := &proto.RequestTransaction{
+		Id:        uuid.NewV4().String(),
+		Timestamp: time.Now().Format(time.RFC3339),
+		Transaction: &proto.Transaction{
+			Id:     uuid.NewV4().String(),
+			UserId: user.ID.String(),
+			Amount: args.Amount,
+		},
+	}
+	_, err := service.ServiceConnection.PoolConnection.MutateBalance(ctx, req)
+	if err != nil {
+		return TransactionResolver{}, err
+	}
+	trId, _ := uuid.FromString(req.Transaction.GetId())
+
+	return TransactionResolver{
+		model.Transaction{
+			ID:     trId,
+			UserID: user.ID,
+			Amount: req.Transaction.GetAmount(),
+		},
 	}, nil
 }

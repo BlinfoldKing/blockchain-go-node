@@ -2,9 +2,12 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/blinfoldking/blockchain-go-node/proto"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/satori/uuid"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,6 +26,45 @@ func UserFromJSON(str string) (user User, err error) {
 	err = json.Unmarshal([]byte(str), &user)
 
 	return
+}
+
+func ValidateToken(tokenString string) (User, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		} else if method != jwt.SigningMethodHS256 {
+			return nil, fmt.Errorf("Signing method invalid")
+		}
+
+		return []byte("secret"), nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		data := claims["user"].(map[string]interface{})
+		id, _ := uuid.FromString(data["id"].(string))
+		role := data["role"].(float64)
+		logrus.Println(data)
+		return User{
+			id,
+			data["name"].(string),
+			data["nik"].(string),
+			proto.User_Role(role),
+			data["username"].(string),
+			data["password_hash"].(string),
+		}, nil
+	} else {
+		logrus.Error(err)
+		return User{}, err
+	}
+}
+
+func (u User) GenerateToken() (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user": u,
+	})
+
+	return token.SignedString([]byte("secret"))
 }
 
 func (u User) toJSON() (string, error) {

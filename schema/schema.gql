@@ -20,6 +20,7 @@ type User {
     name: String!
     username: String!
     nik: String!
+    balance: Balance!
 }
 
 type Transaction {
@@ -29,17 +30,17 @@ type Transaction {
 
 type Balance {
     total_amount: Int!
-    transaction_history: [Transaction!]
+    transaction_history: [Transaction!]!
 }
 
 
 type Query {
-    # Login(request: LoginRequest!): LoginResponse!
-    # GetAccountDetail(): User!
+    Login(request: LoginRequest!): LoginResponse!
+    GetAccountDetail(): User!
     Connect(url: String!): Boolean!
 }
 
 type Mutation {
     Register(request: RegisterRequest!): LoginResponse!
-    # MutateBalance(amount: Int!): Boolean!
+    MutateBalance(amount: Int!): Transaction!
 }

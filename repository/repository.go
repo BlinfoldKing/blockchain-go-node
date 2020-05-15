@@ -19,11 +19,12 @@ type Repository interface {
 	GetBlockByID(id uuid.UUID) (model.Block, error)
 	Count() (int32, error)
 
+	GetUserByUsername(username string) (model.User, error)
 	SaveUser(user model.User) error
 	GetUserByID(id uuid.UUID) (model.User, error)
 
 	SaveTransaction(transaction model.Transaction) error
-	GetTransactionByUserID(id uuid.UUID) (model.Transaction, error)
+	GetTransactionByUserID(id uuid.UUID) ([]model.Transaction, error)
 }
 
 type databaseRepository struct {
