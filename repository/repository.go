@@ -25,6 +25,8 @@ type Repository interface {
 
 	SaveTransaction(transaction model.Transaction) error
 	GetTransactionByUserID(id uuid.UUID) ([]model.Transaction, error)
+
+	DangerouslyDroppingEverything() error
 }
 
 type databaseRepository struct {

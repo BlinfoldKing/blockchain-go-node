@@ -81,6 +81,10 @@ message GetBlockByIdRequest {
     string id = 1;
 }
 
+message DropResponse {
+    bool ok = 1;
+}
+
 service BlockchainService {
     rpc CreateUser(CreateUserRequest) returns (Block) {};
     rpc MutateBalance(RequestTransaction) returns (Block) {};
@@ -93,4 +97,5 @@ service BlockchainService {
 
     rpc Connect(ConnectRequest) returns (ConnectResponse) {};
     rpc Ping(Empty) returns (PingResponse) {};
+    rpc DropEverything(Empty) returns (DropResponse) {};
 }

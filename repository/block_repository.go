@@ -49,3 +49,17 @@ func (repo *databaseRepository) Count() (count int32, err error) {
 
 	return
 }
+
+func (repo *databaseRepository) DangerouslyDroppingEverything() (err error) {
+	err = repo.DB.Delete(&model.Block{}).Error
+	if err != nil {
+		return
+	}
+	err = repo.DB.Delete(&model.User{}).Error
+	if err != nil {
+		return
+	}
+	err = repo.DB.Delete(&model.Transaction{}).Error
+
+	return
+}
